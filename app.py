@@ -1,3 +1,4 @@
+import plotly.express as px
 import streamlit as st
 import pandas as pd
 from sklearn.linear_model import LinearRegression
@@ -63,26 +64,22 @@ if st.button("Predict Temperature"):
 st.divider()
 
 # Graph Section
-st.subheader("📈 Temperature Trend")
+st.subheader("📈 Interactive Temperature Trend")
 
-fig, ax = plt.subplots(figsize=(8, 5))
-
-ax.scatter(
-    df["Day"],
-    df["Temperature"],
-    label="Actual Data"
+plotly_fig = px.line(
+    df,
+    x="Day",
+    y="Temperature",
+    markers=True,
+    title="Temperature Trend"
 )
 
-ax.plot(
-    df["Day"],
-    model.predict(X),
-    label="Prediction Line"
+plotly_fig.update_layout(
+    xaxis_title="Day",
+    yaxis_title="Temperature (°C)"
 )
 
-ax.set_xlabel("Day")
-ax.set_ylabel("Temperature")
-ax.set_title("Weather Prediction")
-
-ax.legend()
-
-st.pyplot(fig)
+st.plotly_chart(
+    plotly_fig,
+    use_container_width=True
+)
