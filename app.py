@@ -1,57 +1,92 @@
-import plotly.express as px
 import streamlit as st
 import pandas as pd
+import requests
+import plotly.express as px
 from sklearn.linear_model import LinearRegression
-import matplotlib.pyplot as plt
 
-# Page settings
+# =========================
+# SETTINGS
+# =========================
 st.set_page_config(
-    page_title="Weather Prediction Dashboard",
+    page_title="Weather Dashboard",
     page_icon="🌤️",
     layout="wide"
 )
 
-# Title
-st.title("🌤️ Weather Prediction Dashboard")
-st.markdown("### Predict future temperatures using Machine Learning")
+# Replace with your API key temporarily
+API_KEY = "PASTE_YOUR_API_KEY_HERE"
 
-# Weather Cards
-col1, col2, col3 = st.columns(3)
+# =========================
+# TITLE
+# =========================
+st.title("🌤️ Smart Weather Dashboard")
+st.write("Live Weather + Temperature Prediction")
 
-with col1:
-    st.metric("🌡️ Current Temp", "34°C")
+# =========================
+# LIVE WEATHER
+# =========================
+st.header("🌍 Live Weather")
 
-with col2:
-    st.metric("💧 Humidity", "65%")
+city = st.text_input("Enter City Name", "Chennai")
 
-with col3:
-    st.metric("🌬️ Wind Speed", "12 km/h")
+if st.button("Get Weather"):
+    url = f"https://api.openweathermap.org/data/2.5/weather?q={city}&appid={API_KEY}&units=metric"
+
+    response = requests.get(url)
+
+    if response.status_code == 200:
+        data = response.json()
+
+        temp = data["main"]["temp"]
+        humidity = data["main"]["humidity"]
+        wind = data["wind"]["speed"]
+        condition = data["weather"][0]["main"]
+
+        col1, col2, col3, col4 = st.columns(4)
+
+        with col1:
+            st.metric("🌡️ Temperature", f"{temp} °C")
+
+        with col2:
+            st.metric("💧 Humidity", f"{humidity}%")
+
+        with col3:
+            st.metric("🌬️ Wind", f"{wind} m/s")
+
+        with col4:
+            st.metric("☁️ Condition", condition)
+
+    else:
+        st.error("City not found or API key not active yet.")
 
 st.divider()
 
-# Load Dataset
+# =========================
+# DATASET
+# =========================
 df = pd.read_csv("weather.csv")
 
-# Show Dataset
 st.subheader("📊 Weather Dataset")
 st.dataframe(df, use_container_width=True)
 
-# Train Model
+# =========================
+# ML MODEL
+# =========================
 X = df[["Day"]]
 y = df["Temperature"]
 
 model = LinearRegression()
 model.fit(X, y)
 
-st.divider()
-
-# Prediction Section
-st.subheader("🌡️ Temperature Prediction")
+# =========================
+# PREDICTION
+# =========================
+st.subheader("🤖 Temperature Prediction")
 
 future_day = st.number_input(
-    "Enter Day Number",
+    "Enter Future Day",
     min_value=1,
-    value=10
+    value=25
 )
 
 if st.button("Predict Temperature"):
@@ -61,12 +96,12 @@ if st.button("Predict Temperature"):
         f"Predicted Temperature on Day {future_day}: {prediction[0]:.2f} °C"
     )
 
-st.divider()
-
-# Graph Section
+# =========================
+# INTERACTIVE GRAPH
+# =========================
 st.subheader("📈 Interactive Temperature Trend")
 
-plotly_fig = px.line(
+fig = px.line(
     df,
     x="Day",
     y="Temperature",
@@ -74,12 +109,7 @@ plotly_fig = px.line(
     title="Temperature Trend"
 )
 
-plotly_fig.update_layout(
-    xaxis_title="Day",
-    yaxis_title="Temperature (°C)"
-)
-
 st.plotly_chart(
-    plotly_fig,
+    fig,
     use_container_width=True
 )
