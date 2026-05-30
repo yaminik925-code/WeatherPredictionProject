@@ -14,7 +14,7 @@ st.set_page_config(
 )
 
 # Replace with your API key temporarily
-API_KEY = "3da3ff8a4561dc6820b39659301c912b"
+API_KEY = "4224fb43fa45442e182cd29adcafd4f0"
 
 # =========================
 # TITLE
